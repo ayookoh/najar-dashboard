@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Najar · Deal Intelligence</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#F7F6F3;--surface:#FFFFFF;--surface2:#F0EEE9;
+  --border:#E2DFDA;--border2:#CBC8C2;
+  --text:#1A1917;--text2:#5C5A56;--text3:#9A9893;
+  --accent:#185FA5;--accent-light:#E6F1FB;
+  --red:#A32D2D;--red-light:#FCEBEB;
+  --amber:#854F0B;--amber-light:#FAEEDA;
+  --green:#3B6D11;--green-light:#EAF3DE;
+  --purple:#534AB7;--purple-light:#EEEDFE;
+  --r:8px;--r-lg:12px;
+  --shadow:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+}
+html{font-size:14px}
+body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.5}
+.app{display:flex;flex-direction:column;min-height:100vh}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:52px;position:sticky;top:0;z-index:100}
+.brand-name{font-size:15px;font-weight:600;letter-spacing:-.3px}
+.brand-sub{font-size:12px;color:var(--text3);margin-left:8px}
+.live-pill{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2);background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:3px 9px}
+.live-dot{width:6px;height:6px;border-radius:50%;background:#639922}
+.main{flex:1;padding:24px;max-width:1200px;margin:0 auto;width:100%}
+.tabs-wrap{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px}
+.tabs{display:flex;gap:2px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:3px}
+.tab{padding:5px 13px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;border:none;background:transparent;color:var(--text2);font-family:inherit;transition:all .15s;white-space:nowrap}
+.tab.on{background:var(--surface);color:var(--text);box-shadow:var(--shadow);border:1px solid var(--border)}
+.pane{display:none}.pane.on{display:block}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:18px}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:14px 16px;box-shadow:var(--shadow)}
+.kv{font-size:22px;font-weight:600;line-height:1;margin-bottom:4px;letter-spacing:-.5px}
+.kv.r{color:var(--red)}.kv.o{color:var(--amber)}.kv.g{color:var(--green)}
+.kl{font-size:11px;color:var(--text2)}.kn{font-size:10px;color:var(--text3);margin-top:2px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px 20px;margin-bottom:12px;box-shadow:var(--shadow)}
+.ct{font-size:10px;font-weight:600;color:var(--text2);letter-spacing:.07em;text-transform:uppercase;margin-bottom:12px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.pill{display:inline-flex;align-items:center;font-size:10px;font-weight:600;padding:2px 7px;border-radius:8px;margin:2px 2px 0 0}
+.pill.r{background:var(--red-light);color:var(--red)}
+.pill.o{background:var(--amber-light);color:var(--amber)}
+.pill.g{background:var(--green-light);color:var(--green)}
+.pill.b{background:var(--accent-light);color:var(--accent)}
+.pill.p{background:var(--purple-light);color:var(--purple)}
+.pill.gray{background:var(--surface2);color:var(--text2)}
+.drow{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+.drow:last-child{border-bottom:none}
+.b3{width:3px;border-radius:2px;align-self:stretch;min-height:32px;flex-shrink:0}
+.fx{flex:1;min-width:0}
+.dn{font-size:13px;font-weight:600;color:var(--text)}
+.dm{font-size:11px;color:var(--text2);margin-top:2px;line-height:1.4}
+.srow{display:flex;justify-content:space-between;align-items:baseline;padding:5px 0;border-bottom:1px solid var(--border)}
+.srow:last-child{border-bottom:none}
+.sl{font-size:11px;color:var(--text2)}.sv{font-size:11px;font-weight:600;color:var(--text)}
+.pbar{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+.pbl{font-size:11px;color:var(--text2);width:130px;flex-shrink:0}
+.pbb{flex:1;height:5px;border-radius:3px;background:var(--surface2);overflow:hidden}
+.pbf{height:5px;border-radius:3px}
+.pbv{font-size:11px;font-weight:600;width:36px;text-align:right;flex-shrink:0}
+.mrow{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border)}
+.mrow:last-child{border-bottom:none}
+.ml{font-size:11px;font-weight:700;width:14px;color:var(--text2);flex-shrink:0}
+.mn{font-size:11px;color:var(--text2);width:110px;flex-shrink:0}
+.mv{font-size:11px;color:var(--text);flex:1;line-height:1.4}
+.ms{font-size:10px;font-weight:600;padding:2px 5px;border-radius:6px;flex-shrink:0}
+.ms.g{background:var(--green-light);color:var(--green)}
+.ms.o{background:var(--amber-light);color:var(--amber)}
+.ms.r{background:var(--red-light);color:var(--red)}
+.persona-layout{display:grid;grid-template-columns:200px 1fr;gap:14px}
+.plist{display:flex;flex-direction:column;gap:6px}
+.pcard{border:1px solid var(--border);border-radius:var(--r-lg);padding:12px;cursor:pointer;background:var(--surface);transition:all .15s;box-shadow:var(--shadow)}
+.pcard:hover{border-color:var(--border2)}
+.pcard.on{background:var(--surface2);border-color:var(--border2)}
+.av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+.pcard-top{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+.pcn{font-size:12px;font-weight:600;color:var(--text)}
+.pct{font-size:10px;color:var(--text2);line-height:1.3}
+.ph{display:flex;align-items:flex-start;gap:12px;margin-bottom:14px}
+.av-lg{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;flex-shrink:0}
+.ph-name{font-size:17px;font-weight:700;color:var(--text)}
+.ph-title{font-size:12px;color:var(--text2);margin-top:3px}
+.ph-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:7px}
+.sbanner{border-radius:var(--r);padding:8px 12px;margin-bottom:12px;font-size:11px;line-height:1.4;font-weight:500}
+.sbanner.warn{background:var(--amber-light);color:var(--amber)}
+.sbanner.danger{background:var(--red-light);color:var(--red)}
+.sbanner.info{background:var(--accent-light);color:var(--accent)}
+.pgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.pblock{background:var(--surface2);border-radius:var(--r);padding:10px}
+.pblabel{font-size:9px;font-weight:700;color:var(--text2);letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px}
+.pbval{font-size:11px;color:var(--text);line-height:1.5}
+.sitrow{display:flex;gap:8px;margin-bottom:8px}
+.si-label{font-size:10px;font-weight:700;color:var(--text2);margin-bottom:2px;text-transform:uppercase;letter-spacing:.04em}
+.si-text{font-size:11px;color:var(--text);line-height:1.5}
+.msg-item{display:flex;gap:6px;margin-bottom:7px}
+.msg-num{font-size:10px;font-weight:700;color:var(--text3);width:14px;flex-shrink:0;padding-top:2px}
+.msg-text{font-size:11px;color:var(--text);line-height:1.5;background:var(--surface2);border-radius:var(--r);padding:8px 10px;flex:1;border-left:2px solid var(--accent)}
+.avd-item{display:flex;gap:6px;margin-bottom:5px}
+.avd-x{color:var(--red);font-size:11px;flex-shrink:0;margin-top:1px;font-weight:700}
+.avd-text{font-size:11px;color:var(--text);line-height:1.4}
+.q-item{display:flex;gap:6px;margin-bottom:7px}
+.q-num{font-size:11px;font-weight:700;color:var(--text3);width:16px;flex-shrink:0}
+.q-q{font-size:11px;color:var(--text);line-height:1.5}
+.q-why{font-size:10px;color:var(--text3);margin-top:2px}
+.sig-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.sbuy{background:var(--green-light);border-radius:var(--r);padding:10px}
+.srisk{background:var(--red-light);border-radius:var(--r);padding:10px}
+.sblabel{font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px}
+.sbuy .sblabel{color:var(--green)}.srisk .sblabel{color:var(--red)}
+.sitem{font-size:11px;color:var(--text);margin-bottom:4px;display:flex;gap:5px;line-height:1.4}
+.dyn{background:var(--surface2);border-radius:var(--r);padding:12px;margin-top:6px}
+.dynrow{display:flex;gap:8px;margin-bottom:6px}.dynrow:last-child{margin-bottom:0}
+.dynlabel{font-size:10px;font-weight:700;color:var(--text2);width:90px;flex-shrink:0;text-transform:uppercase;letter-spacing:.04em;padding-top:1px}
+.dyntext{font-size:11px;color:var(--text);line-height:1.5;flex:1}
+.coach-item{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+.coach-item:last-child{border-bottom:none}
+.cnum{width:22px;height:22px;border-radius:50%;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--text2);flex-shrink:0;margin-top:1px}
+.cwho{font-size:12px;font-weight:700;color:var(--text)}
+.cdeal{font-size:10px;color:var(--text2);margin-top:1px}
+.cobs{font-size:11px;color:var(--text);margin-top:5px;line-height:1.5}
+.cact{font-size:10px;color:var(--accent);margin-top:3px;font-weight:500}
+.deal-switcher{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.deal-btn{padding:5px 12px;border-radius:var(--r);font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--text2);font-family:inherit;transition:all .15s}
+.deal-btn.on{background:var(--text);color:#fff;border-color:var(--text)}
+select{font-size:12px;padding:5px 9px;border-radius:var(--r);border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:inherit;margin-bottom:12px;width:100%}
+.stitle{font-size:10px;font-weight:700;color:var(--text2);letter-spacing:.07em;text-transform:uppercase;margin-bottom:8px}
+.empty{text-align:center;padding:32px;color:var(--text3);font-size:13px}
+.loading-screen{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:1000}
+.loading-screen.hidden{display:none}
+.spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.load-text{font-size:13px;color:var(--text2)}.load-step{font-size:11px;color:var(--text3)}
+.err{background:var(--red-light);border:1px solid var(--red);border-radius:var(--r);padding:12px 16px;margin-bottom:16px;font-size:12px;color:var(--red);line-height:1.5;display:none}
+@media(max-width:600px){
+  .main{padding:14px}.topbar{padding:0 14px}
+  .two,.pgrid,.sig-grid{grid-template-columns:1fr}
+  .persona-layout{grid-template-columns:1fr}
+  .tabs{flex-wrap:wrap}
+}
+</style>
+</head>
+<body>
+
+<div class="loading-screen" id="loading">
+  <div class="spinner"></div>
+  <div class="load-text">Loading deal intelligence…</div>
+  <div class="load-step" id="load-step">Connecting to Notion via Claude</div>
+</div>
+
+<div class="app" id="app" style="display:none">
+  <div class="topbar">
+    <div style="display:flex;align-items:center">
+      <div class="brand-name">Najar</div>
+      <div class="brand-sub">· Deal Intelligence</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <div class="live-pill"><div class="live-dot"></div><span id="refresh-time">Live · Notion</span></div>
+      <div class="tabs">
+        <button class="tab on" onclick="sw('csuite',this)">C-suite</button>
+        <button class="tab" onclick="sw('analytics',this)">Analytics</button>
+        <button class="tab" onclick="sw('vpsales',this)">VP Sales</button>
+        <button class="tab" onclick="sw('presales',this)">Pre-sales</button>
+        <button class="tab" onclick="sw('ae',this)">AE · Personas</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="err" id="err"></div>
+
+    <div id="pane-csuite" class="pane on">
+      <div class="kpis" id="cs-kpis"></div>
+      <div class="two">
+        <div class="card"><div class="ct">Deals at risk</div><div id="cs-deals"></div></div>
+        <div class="card"><div class="ct">Strategic signals</div><div id="cs-sigs"></div></div>
+      </div>
+      <div class="card"><div class="ct">Decisions needed this week</div><div id="cs-decisions"></div></div>
+    </div>
+
+    <div id="pane-analytics" class="pane">
+      <div class="kpis" id="an-kpis"></div>
+      <div class="card"><div class="ct">Pipeline by stage</div><div id="an-funnel"></div></div>
+      <div class="two">
+        <div class="card"><div class="ct">MEDDPICC completeness</div><div id="an-medd"></div></div>
+        <div class="card"><div class="ct">Cross-deal patterns</div><div id="an-pat"></div></div>
+      </div>
+    </div>
+
+    <div id="pane-vpsales" class="pane">
+      <div class="kpis" id="vp-kpis"></div>
+      <div class="card"><div class="ct">Coaching priorities</div><div id="vp-coach"></div></div>
+    </div>
+
+    <div id="pane-presales" class="pane">
+      <select id="ps-sel" onchange="renderPS()"></select>
+      <div id="ps-body"></div>
+    </div>
+
+    <div id="pane-ae" class="pane">
+      <div class="deal-switcher" id="ae-sw"></div>
+      <div class="persona-layout">
+        <div class="plist" id="plist"></div>
+        <div id="pdetail"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── Config ──────────────────────────────────────────────── */
+const PROXY = '/api/claude';           // Netlify function route
+const DB_ID = 'd95f90bb-ffd2-4df2-84f4-5b0a280aab16';
+const NOTION_MCP = 'https://mcp.notion.com/mcp';
+const MODEL = 'claude-sonnet-4-6';
+
+/* ── State ───────────────────────────────────────────────── */
+let deals = [];
+let curDeal = null;
+let curPersona = null;
+
+/* ── Boot ────────────────────────────────────────────────── */
+document.addEventListener('DOMContentLoaded', boot);
+
+async function boot() {
+  try {
+    step('Reading deal pages from Notion…');
+    deals = await fetchDeals();
+    if (!deals.length) { showErr('No deals found. Run the Deal Inception Agent first.'); hideLoad(); return; }
+    curDeal = deals[0].id;
+    curPersona = deals[0].personas?.[0]?.id || null;
+    step('Rendering dashboard…');
+    renderAll();
+    hideLoad();
+    document.getElementById('app').style.display = 'flex';
+    document.getElementById('refresh-time').textContent =
+      'Live · ' + new Date().toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'});
+  } catch(e) {
+    showErr('Failed to load: ' + e.message + '. Check that ANTHROPIC_API_KEY is set in Netlify and the Notion MCP is connected.');
+    hideLoad();
+    document.getElementById('app').style.display = 'flex';
+  }
+}
+
+/* ── Fetch deals via proxy → Claude → Notion MCP ────────── */
+async function fetchDeals() {
+  const system = `You are a data extraction agent. Read Notion deal pages from database collection ${DB_ID} and return structured JSON.
+
+For each deal page, extract these fields (use null if unavailable):
+id, name, amount (number), stage, ae, bdr, nextMeeting, pe_flag (RED/AMBER/GREEN/NONE), pe_fund,
+health_score (number /5), meddpicc_score (percentage), key_insight (1-2 sentences),
+flags: [{label, severity (r/o/g/b)}],
+meddpicc: [{letter, name, value, status (acquired/partial/missing)}],
+personas: [{
+  id, initials, avatarBg (hex), avatarColor (hex), name, title, tenure, role, profile,
+  statusType (info/warn/danger), statusLabel,
+  tags: [{label, cls (r/o/g/b/p/gray)}],
+  sit_heritage, sit_pressure, sit_victory, sit_risk,
+  type, langage, motive, mefiant, posture,
+  messages: [string × 3],
+  avoids: [string × 2-3],
+  questions: [{q, why}],
+  buy_signals: [string], risk_signals: [string],
+  dynamics
+}],
+contact_dynamics: {relation, influence, strategy},
+timeline: [{date, dot_color (hex), event, detail}],
+coaching_obs, coaching_action
+
+Return ONLY a raw JSON array. No markdown, no backticks, no explanation. Start with [ end with ].`;
+
+  const res = await fetch(PROXY, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      model: MODEL,
+      max_tokens: 8000,
+      system,
+      messages: [{role: 'user', content: `Read all deal pages from Notion database collection ${DB_ID} and return the JSON array.`}],
+      mcp_servers: [{type: 'url', url: NOTION_MCP, name: 'notion'}]
+    })
+  });
+
+  if (!res.ok) {
+    const e = await res.json().catch(() => ({}));
+    throw new Error(e.error?.message || `HTTP ${res.status}`);
+  }
+
+  const data = await res.json();
+  const text = (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('');
+  const clean = text.replace(/```json|```/g, '').trim();
+  const s = clean.indexOf('['), e = clean.lastIndexOf(']');
+  if (s === -1 || e === -1) throw new Error('Could not parse JSON from response');
+  return JSON.parse(clean.slice(s, e + 1));
+}
+
+/* ── Render all ──────────────────────────────────────────── */
+function renderAll() { renderCS(); renderAN(); renderVP(); renderPS(); renderAE(); }
+
+/* ── C-suite ─────────────────────────────────────────────── */
+function renderCS() {
+  const total = deals.reduce((s,d) => s + (d.amount||0), 0);
+  const atRisk = deals.filter(d => d.pe_flag==='RED' || (d.health_score&&d.health_score<3)).reduce((s,d)=>s+(d.amount||0),0);
+  const avgH = avg(deals.filter(d=>d.health_score).map(d=>d.health_score));
+
+  el('cs-kpis', kpi('€'+fmt(total),'Pipeline analysed',deals.length+' deal(s) with full analysis')
+    + kpi('€'+fmt(atRisk),'Revenue at risk','PE RED or health <3',atRisk>0?'r':'g')
+    + kpi(avgH?avgH.toFixed(1)+'/5':'—','Avg deal health','Target 3.5+',avgH&&avgH<3?'r':avgH&&avgH<3.5?'o':'g')
+    + kpi(deals.length,'Deals tracked','By AI agent pipeline'));
+
+  el('cs-deals', deals.map(d => {
+    const col = d.pe_flag==='RED'?'var(--red)':d.pe_flag==='AMBER'?'var(--amber)':'var(--green)';
+    return `<div class="drow">
+      <div class="b3" style="background:${col}"></div>
+      <div class="fx">
+        <div class="dn">${d.name} <span style="font-weight:400;font-size:11px;color:var(--text2)">· ${d.stage||'M1'}</span></div>
+        <div class="dm">${d.ae||'AE TBC'} · ${d.bdr||'BDR TBC'}${d.nextMeeting?' · '+d.nextMeeting:''}</div>
+        <div style="margin-top:4px">${(d.flags||[]).slice(0,3).map(f=>`<span class="pill ${f.severity}">${f.label}</span>`).join('')}</div>
+      </div>
+      <div style="font-size:13px;font-weight:600;white-space:nowrap;flex-shrink:0">€${fmt(d.amount)}</div>
+    </div>`;
+  }).join(''));
+
+  const sigs = deals.flatMap(d => [
+    d.key_insight ? {l:d.name+' — '+d.key_insight.slice(0,80)+(d.key_insight.length>80?'…':''), v:'Open', c:'g'} : null,
+    d.pe_flag==='RED' ? {l:d.name+' — PE RED ('+d.pe_fund+')', v:'Watch', c:'r'} : null,
+  ]).filter(Boolean);
+  sigs.push({l:'EBs reachable', v:deals.filter(d=>d.meddpicc?.find(m=>m.letter==='E'&&m.status==='acquired')).length+'/'+deals.length, c:'b'});
+  el('cs-sigs', sigs.map(s=>`<div class="srow"><div class="sl">${s.l}</div><div class="sv" style="color:var(--${s.c==='r'?'red':s.c==='o'?'amber':s.c==='g'?'green':'accent'})">${s.v}</div></div>`).join(''));
+
+  el('cs-decisions', deals.filter(d=>d.coaching_action).map(d=>
+    `<div class="drow"><div class="b3" style="background:var(--red)"></div><div class="fx"><div class="dn">${d.name} — ${d.coaching_obs||'Action required'}</div><div class="dm">${d.coaching_action}</div></div></div>`
+  ).join('') || '<div class="empty">No urgent decisions flagged</div>');
+}
+
+/* ── Analytics ───────────────────────────────────────────── */
+function renderAN() {
+  const calls = deals.reduce((s,d)=>s+(d.call_count||0),0);
+  const ms = deals.filter(d=>d.meddpicc_score!=null).map(d=>d.meddpicc_score);
+  const am = ms.length ? Math.round(ms.reduce((a,b)=>a+b,0)/ms.length) : null;
+
+  el('an-kpis', kpi(deals.length,'Deals analysed','AI agent pipeline')
+    + kpi(calls||'—','Calls catalogued','Across all deals')
+    + kpi(am!=null?am+'%':'—','MEDDPICC avg','Scored deals',am&&am<50?'r':am&&am<70?'o':'g')
+    + kpi('€'+fmt(deals.reduce((s,d)=>s+(d.amount||0),0)),'Total pipeline',''));
+
+  const stages=['M1','Discovery','Demo','Business Case','Pricing','Closed'];
+  const sm={}; deals.forEach(d=>{const s=d.stage||'M1';sm[s]=(sm[s]||0)+(d.amount||0);});
+  const mx=Math.max(...Object.values(sm),1);
+  el('an-funnel', stages.map(s=>{
+    const a=sm[s]||0,p=Math.round(a/mx*100);
+    return `<div class="pbar"><div class="pbl">${s}</div><div class="pbb"><div class="pbf" style="width:${p}%;background:${a?'#378ADD':'var(--border)'}"></div></div><div class="pbv" style="color:${a?'var(--accent)':'var(--text3)'}">${a?'€'+fmt(a):'€0'}</div></div>`;
+  }).join(''));
+
+  const sd=deals.find(d=>d.meddpicc?.length);
+  el('an-medd', sd ? sd.meddpicc.map(m=>
+    `<div class="mrow"><div class="ml">${m.letter}</div><div class="mn">${m.name}</div><div class="mv">${m.value||'—'}</div><div class="ms ${m.status==='acquired'?'g':m.status==='partial'?'o':'r'}">${m.status==='acquired'?'Acquired':m.status==='partial'?'Partial':'Missing'}</div></div>`
+  ).join('') : '<div class="empty">Run Deal Analyzer to see MEDDPICC</div>');
+
+  const pats=[
+    {l:'Single threading',v:deals.filter(d=>(d.personas?.length||0)<=1).length+'/'+deals.length,bad:true},
+    {l:'EB identified',v:deals.filter(d=>d.meddpicc?.find(m=>m.letter==='E'&&m.status!=='missing')).length+'/'+deals.length,bad:false},
+    {l:'Next step dated',v:deals.filter(d=>d.nextMeeting).length+'/'+deals.length,bad:false},
+  ];
+  el('an-pat', pats.map(p=>{
+    const [n,d]=p.v.split('/').map(Number),pct=d?Math.round(n/d*100):0;
+    const col=p.bad?(pct<50?'#639922':'#E24B4A'):(pct>60?'#639922':'#E24B4A');
+    return `<div class="pbar"><div class="pbl">${p.l}</div><div class="pbb"><div class="pbf" style="width:${pct}%;background:${col}"></div></div><div class="pbv" style="color:${col}">${p.v}</div></div>`;
+  }).join(''));
+}
+
+/* ── VP Sales ────────────────────────────────────────────── */
+function renderVP() {
+  const ae=deals.filter(d=>d.ae&&d.ae!=='Non assigné').length;
+  const eb=deals.filter(d=>d.meddpicc?.find(m=>m.letter==='E'&&m.status==='acquired')).length;
+  el('vp-kpis', kpi(ae+'/'+deals.length,'AEs assigned','',ae<deals.length?'r':'g')
+    + kpi(eb+'/'+deals.length,'EBs reachable','',eb<deals.length?'r':'g')
+    + kpi(deals.filter(d=>d.health_score&&d.health_score>=3.5).length+'/'+deals.length,'Deals healthy','Score ≥3.5','')
+    + kpi(deals.filter(d=>d.nextMeeting).length,'M1s scheduled','',''));
+
+  el('vp-coach', deals.filter(d=>d.coaching_obs).map((d,i)=>
+    `<div class="coach-item">
+      <div class="cnum">${i+1}</div>
+      <div>
+        <div class="cwho">${d.ae||'AE TBC'} — ${d.name} · €${fmt(d.amount)}</div>
+        <div class="cdeal">${d.nextMeeting?'Next: '+d.nextMeeting:'No meeting scheduled'}</div>
+        <div class="cobs">${d.coaching_obs}</div>
+        <div class="cact">→ ${d.coaching_action||'Verify readiness'}</div>
+      </div>
+    </div>`
+  ).join('') || '<div class="empty">No coaching priorities yet</div>');
+}
+
+/* ── Pre-sales ───────────────────────────────────────────── */
+function renderPS() {
+  const sel=document.getElementById('ps-sel');
+  if (!sel.innerHTML) sel.innerHTML=deals.map(d=>`<option value="${d.id}">${d.name} — ${d.stage||'M1'} · €${fmt(d.amount)}${d.nextMeeting?' · '+d.nextMeeting:''}</option>`).join('');
+  const d=deals.find(x=>x.id===sel.value)||deals[0];
+  if (!d) return;
+  el('ps-body', `<div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
+      <div><div style="font-size:14px;font-weight:700">${d.name}</div><div style="font-size:11px;color:var(--text2);margin-top:2px">${d.stage||'M1'} · €${fmt(d.amount)}${d.ae?' · AE: '+d.ae:''}</div></div>
+      ${d.nextMeeting?`<span class="pill r" style="padding:4px 9px">${d.nextMeeting}</span>`:''}
+    </div>
+    ${d.key_insight?`<div style="background:var(--surface2);border-radius:var(--r);padding:10px;margin-bottom:10px;font-size:11px;color:var(--text);line-height:1.6;border-left:3px solid var(--accent)">${d.key_insight}</div>`:''}
+    <div class="stitle">Flags</div>
+    <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px">${(d.flags||[]).map(f=>`<span class="pill ${f.severity}">${f.label}</span>`).join('')||'<span class="pill gray">No flags</span>'}</div>
+    <div class="stitle">Contacts</div>
+    ${(d.personas||[]).map(p=>`<div class="drow"><div class="fx"><div class="dn">${p.name} <span style="font-weight:400;font-size:11px;color:var(--text2)">· ${p.title}</span></div><div class="dm">${p.tenure||''} · ${p.profile||''}</div></div><span class="pill b">${p.role}</span></div>`).join('')||'<div class="empty">No contacts yet</div>'}
+  </div>`);
+}
+
+/* ── AE · Personas ───────────────────────────────────────── */
+function setDeal(id,btn){
+  document.querySelectorAll('#ae-sw .deal-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on'); curDeal=id;
+  curPersona=deals.find(d=>d.id===id)?.personas?.[0]?.id||null; renderAE();
+}
+function setPersona(id){curPersona=id;renderAE();}
+
+function renderAE(){
+  el('ae-sw', deals.map(d=>`<button class="deal-btn${d.id===curDeal?' on':''}" onclick="setDeal('${d.id}',this)">${d.name} · €${fmt(d.amount)}</button>`).join(''));
+  const deal=deals.find(d=>d.id===curDeal)||deals[0];
+  if (!deal) return;
+  if (!curPersona&&deal.personas?.length) curPersona=deal.personas[0].id;
+
+  el('plist', (deal.personas||[]).map(p=>
+    `<div class="pcard${p.id===curPersona?' on':''}" onclick="setPersona('${p.id}')">
+      <div class="pcard-top"><div class="av" style="background:${p.avatarBg||'#E6F1FB'};color:${p.avatarColor||'#185FA5'}">${p.initials||'?'}</div>
+      <div><div class="pcn">${p.name}</div><div class="pct">${p.title}</div></div></div>
+      <div>${(p.tags||[]).map(t=>`<span class="pill ${t.cls}">${t.label}</span>`).join('')}</div>
+    </div>`
+  ).join('')||'<div class="empty">No personas yet</div>');
+
+  const p=(deal.personas||[]).find(x=>x.id===curPersona);
+  if (!p){el('pdetail','<div class="empty">Select a contact on the left</div>');return;}
+  const dy=deal.contact_dynamics;
+
+  el('pdetail', `
+    <div class="ph">
+      <div class="av-lg" style="background:${p.avatarBg||'#E6F1FB'};color:${p.avatarColor||'#185FA5'}">${p.initials||'?'}</div>
+      <div><div class="ph-name">${p.name}</div><div class="ph-title">${p.title} · ${p.tenure||''}</div>
+      <div class="ph-tags">${(p.tags||[]).map(t=>`<span class="pill ${t.cls}">${t.label}</span>`).join('')}<span class="pill gray">${p.role}</span></div></div>
+    </div>
+    <div class="sbanner ${p.statusType||'info'}">${p.statusLabel||'Active'}</div>
+
+    <div class="card" style="margin-bottom:8px">
+      <div class="stitle">Psychological profile</div>
+      <div class="pgrid">
+        <div class="pblock"><div class="pblabel">Type</div><div class="pbval">${p.type||'—'}</div></div>
+        <div class="pblock"><div class="pblabel">Language</div><div class="pbval">${p.langage||'—'}</div></div>
+        <div class="pblock"><div class="pblabel">Motivated by</div><div class="pbval">${p.motive||'—'}</div></div>
+        <div class="pblock"><div class="pblabel">Suspicious of</div><div class="pbval">${p.mefiant||'—'}</div></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:8px">
+      <div class="stitle">Current situation</div>
+      ${sit('🏢','What they inherited',p.sit_heritage)}
+      ${sit('⚡','Pressure they face',p.sit_pressure)}
+      ${sit('🏆','Quick win they seek',p.sit_victory)}
+      ${sit('🛡️','Risk of engaging',p.sit_risk)}
+    </div>
+
+    <div class="card" style="margin-bottom:8px">
+      <div class="stitle">How to build confidence in Najar · Posture: ${p.posture||'Consultant'}</div>
+      <div class="stitle" style="margin-bottom:5px;margin-top:10px">Say this</div>
+      ${(p.messages||[]).map((m,i)=>`<div class="msg-item"><div class="msg-num">${i+1}</div><div class="msg-text">${m}</div></div>`).join('')}
+      <div class="stitle" style="margin-bottom:5px;margin-top:12px">Never say this</div>
+      ${(p.avoids||[]).map(a=>`<div class="avd-item"><div class="avd-x">✕</div><div class="avd-text">${a}</div></div>`).join('')}
+    </div>
+
+    ${p.questions?.length?`<div class="card" style="margin-bottom:8px">
+      <div class="stitle">Recommended questions</div>
+      ${p.questions.map((q,i)=>`<div class="q-item"><div class="q-num">${i+1}</div><div><div class="q-q">${q.q}</div><div class="q-why">${q.why}</div></div></div>`).join('')}
+    </div>`:''}
+
+    ${(p.buy_signals?.length||p.risk_signals?.length)?`<div class="sig-grid" style="margin-bottom:8px">
+      <div class="sbuy"><div class="sblabel">Buy signals</div>${(p.buy_signals||[]).map(s=>`<div class="sitem"><span style="color:var(--green);font-weight:700;margin-right:4px">✓</span>${s}</div>`).join('')}</div>
+      <div class="srisk"><div class="sblabel">Risk signals</div>${(p.risk_signals||[]).map(s=>`<div class="sitem"><span style="color:var(--red);font-weight:700;margin-right:4px">!</span>${s}</div>`).join('')}</div>
+    </div>`:''}
+
+    ${p.dynamics?`<div class="card" style="margin-bottom:8px"><div class="stitle">Strategic note</div><div style="font-size:11px;color:var(--text);line-height:1.5">${p.dynamics}</div></div>`:''}
+
+    ${dy?`<div class="card" style="margin-bottom:8px">
+      <div class="stitle">Contact dynamics</div>
+      <div class="dyn">
+        <div class="dynrow"><div class="dynlabel">Relationship</div><div class="dyntext">${dy.relation||'—'}</div></div>
+        <div class="dynrow"><div class="dynlabel">Influence</div><div class="dyntext">${dy.influence||'—'}</div></div>
+        <div class="dynrow"><div class="dynlabel">Strategy</div><div class="dyntext">${dy.strategy||'—'}</div></div>
+      </div>
+    </div>`:''}
+
+    ${deal.timeline?.length?`<div class="card" style="margin-bottom:8px">
+      <div class="stitle">Deal timeline</div>
+      ${deal.timeline.map(t=>`<div style="display:flex;gap:8px;margin-bottom:8px"><div style="font-size:10px;color:var(--text3);width:64px;flex-shrink:0;padding-top:2px">${t.date}</div><div style="width:7px;height:7px;border-radius:50%;background:${t.dot_color||'var(--accent)'};flex-shrink:0;margin-top:3px"></div><div><div style="font-size:11px;font-weight:600">${t.event}</div><div style="font-size:10px;color:var(--text2);margin-top:1px">${t.detail}</div></div></div>`).join('')}
+    </div>`:''}
+  `);
+}
+
+/* ── Helpers ─────────────────────────────────────────────── */
+function sw(id,btn){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  document.querySelectorAll('.pane').forEach(p=>p.classList.remove('on'));
+  btn.classList.add('on'); document.getElementById('pane-'+id).classList.add('on');
+}
+function el(id,html){const e=document.getElementById(id);if(e)e.innerHTML=html;}
+function kpi(v,l,n,c=''){return `<div class="kpi"><div class="kv ${c}">${v}</div><div class="kl">${l}</div>${n?`<div class="kn">${n}</div>`:''}</div>`;}
+function sit(icon,label,text){return text?`<div class="sitrow"><div style="font-size:13px;flex-shrink:0;margin-top:1px">${icon}</div><div><div class="si-label">${label}</div><div class="si-text">${text}</div></div></div>`:'';}
+function fmt(n){if(!n)return '0';if(n>=1000)return Math.round(n/1000)+'K';return ''+n;}
+function avg(arr){return arr.length?arr.reduce((a,b)=>a+b,0)/arr.length:0;}
+function showErr(msg){const e=document.getElementById('err');e.textContent=msg;e.style.display='block';}
+function hideLoad(){document.getElementById('loading').classList.add('hidden');}
+function step(t){document.getElementById('load-step').textContent=t;}
+</script>
+</body>
+</html>
